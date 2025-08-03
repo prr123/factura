@@ -12,6 +12,10 @@ import (
 type date struct {
 	date time.Time
 }
+type period struct {
+	StartDate date `xml:"StartDate"`
+	EndDate date `xml:"EndDate"`
+}
 
 type Factura struct {
 	// 1
@@ -30,9 +34,9 @@ type FileHd struct {
 	// 1.3
 	InvoiceIssuerType string
 	// 1.4
-	ThirdParty TParty
+	ThirdParty *TParty
 	// 1.5
-	Batch BatchList
+	Batch *BatchList
 	// 1.6
 	FactoryAsssignmentData FactAssign	
 }
@@ -90,8 +94,8 @@ type BuyerName struct {
 	Name string `xml:"Name"`
 	FirstSurname string `xml:"FirstSurname,omitempty"`
 	SecondSurname string `xml:"SecondSurname,omitempty"`
-	AddressInSpain AddrSpain
-	OverseasAddress AddrOver
+	AddressInSpain *AddrSpain
+	OverseasAddress *AddrOver
 	ContactDetails string `xml:"ContactDetails,omitempty"`
 	Telephone string `xml:"Telephone,omitempty"`
 	TeleFax string `xml:"TeleFax,omitempty"`
@@ -129,20 +133,19 @@ type Invoice struct {
 	// 3.1.2
 	InvoiceIssueData InvData
 	// 3.1.3
-	TaxesOutputs TaxOut
+	TaxesOutputs *TaxOut
 	// 3.1.4
-	TaxesWithheld TaxWith
+	TaxesWithheld *TaxWith
 	// 3.1.5
 	InvoiceTotals InvTot
 	// 3.1.6
 	Items InvItems
 	// 3.1.7
-	PaymentDetails PayDet
+	PaymentDetails *PayDet
 	// 3.1.8
-	LegalLiterals LegalLit
+	LegalLiterals *LegalLit
 	// 3.1.9
-	AdditionalData AddData
-	
+	AdditionalData *AddData
 }
 
 // 3.1.1
@@ -156,36 +159,158 @@ type InvHd struct {
 	// 3.1.1.4
 	InvoiceClass string `xml:"InvoiceClass,omitempty"`
 	// 3.1.1.5
-	Corrective InvCorr
+	Corrective *InvCorr
 }
 
 
 // 3.1.2
 type InvData struct {
 	IssueDate date
-	OperationDate date
+	OperationDate *date
 	PlaceOfIssue string
-	InvoicePeriod Period
+	InvoicePeriod period
 }
 
 // 3.1.3
 type TaxOut struct {
+	// 3.1.3.1
+	Tax *taxDet
+}
+//3.1.3.1
+type taxDet struct {
+	TaxTypeCode string `xml:"TaxTypeCode,omitempty"`
+	TaxRate	float64 `xml:"TaxRate,omitempty"`
+	// 3.1.3.1.3
+	TaxableBase *taxbase
+	TaxAmount *taxbase
+	// 3.1.3.1.5
+	SpecialTaxableBase *taxbase
+	SpecialTaxAmount *taxbase
+	// 3.1.3.1.7
+	EquivalenceSurcharge float64 `xml:"EquivalenceSurcharge,omitempty"`
+	EquivalenceSurchargeAmount *taxbase
+}
 
+// 3.1.3.1.3
+type taxbase struct {
+	TotalAmount float64 `xml:"TotalAmount"`
+	EquivalentInEuros float64 `xml:"EquivalentInEuros"`
 }
 
 // 3.1.4
 type TaxWith struct {
+	Tax *taxDet
+}
+
+// 3.1.4.1
+type taxwithdet  struct {
+	TaxTypeCode
+	TaxRate
+
 
 }
 
 // 3.1.5
 type InvTot struct {
-
+	TotalGrossAmount float64
+//	GeneralDiscounts *disc
+//	Charge 
 }
+
 
 // 3.1.6
 type InvItems struct {
+	// 3.1.6.1
+	InvoiceLine InvLine
+}
 
+
+type InvLine struct {
+	// 3.1.6.1.1
+	IssuerContractReference string `xml:"IssuerContractReference,omitempty"`
+	IssuerContractDate *date
+	IssuerTransactionReference string `xml:"IssuerTransactionReference,omitempty"`
+	IssuerTransactionDate *date
+	ReceiverContractReference string `xml:"ReceiverContractReference,omitempty"`
+	ReceiverContractDate *date
+	ReceiverTransactionReference string `xml:"ReceiverTransactionReference,omitempty"`
+	ReceiverTransactionDate *date
+	FileReference string `xml:"FileReference,omitempty"`
+	// 3.1.6.1.10
+	FileDate *date `xml:"FileDate,omitempty"`
+	// 3.1.6.1.11
+	SequenceNumber int64 `xml:"SequenceNumber,omitempty"`
+	// 3.1.6.1.12
+	DeliveryNotesReference *DelivRef
+	// 3.1.6.1.13
+	ItemDescription string `xml:"ItemDescription,omitempty"`
+	// 3.1.6.1.14
+	Quantity int64 `xml:"Quantity"`
+	// 3.1.6.1.15
+	UnitOfMeasure string `xml:"UnitOfMeasure,omitempty"`
+	// 3.1.6.1.16
+	UnitPriceWithoutTax float64 `xml:"UnitPriceWithoutTax"`
+	// 3.1.6.1.17
+	TotalCost double `xml:"TotalCost"`
+	// 3.1.6.1.18
+	DiscountsAndRebates *ItDisc
+	// 3.1.6.1.19
+	Charges *Charge
+	// 3.1.6.1.20
+	GrossAmount float64 `xml:"GrossAmount"`
+	// 3.1.6.1.21
+	TaxesWithheld *TaxWith
+	// 3.1.6.1.22
+	TaxesOutputs *ItTaxOut
+	// 3.1.6.1.23
+	LineItemPeriod *period
+	// 3.1.6.1.24
+	TransactionDate *date
+	// 3.1.6.1.25
+	AdditionalLineItemInformation string `xml:"AdditionalLineItemInformation,omitempty"`
+	// 3.1.6.1.26
+	SpecialTaxableEvent *specTaxEv
+	// 3.1.6.1.27
+	ArticleCode string `xml:"ArticleCode,omitempty"`
+	// 3.1.6.1.28
+//	Extensions
+}
+
+// 3.1.6.1.12
+type DelivRef struct {
+
+}
+
+// 3.1.6.1.18
+type Disc struct {
+	Discount *DiscDet
+}
+// 3.1.6.1.18.1
+type DiscDet struct {
+	DiscountReason string `xml:"DiscountReason,omitempty"`
+	DiscountRate float64 `xml:"DiscountRate,omitempty"`
+	DiscountAmount float64 `xml:"DiscountAmount"`
+}
+
+// 3.1.6.1.19
+type Charg struct {
+	Charge *CharDet
+}
+// 3.1.6.1.19.1
+type CharDet struct {
+	// 3.1.6.1.19.1.1
+	ChargeReason string `xml:"ChargeReason,omitempty"`
+	ChargeRate float64 `xml:"ChargeRate,omitempty"`
+	ChargeAmount float64 `xml:"ChargeAmount"`
+}
+// 3.1.6.1.22
+type ItTaxOut struct {
+	Tax string
+}
+// 3.1.6.1.26
+type specTaxEv struct {
+	SpecialTaxEventCode string `xml:"SpecialTaxEventCode"`
+	SpecialTaxEventReason string `xml:"SpecialTaxEventReason,omitempty"`
 }
 
 // 3.1.7 payment details
@@ -218,10 +343,6 @@ type InvCorr struct {
 }
 
 
-type Period struct {
-	StartDate date `xml:"StartDate"`
-	EndDate date `xml:"EndDate"`
-}
 
 // 3.1.2
 // 3.1.2.2
